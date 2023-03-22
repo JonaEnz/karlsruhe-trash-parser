@@ -15,9 +15,9 @@ import (
 )
 
 type TrashCollection struct {
-	Name             string
-	CollectionPeriod string
-	CollectionDates  []time.Time
+	Name string `json:"name"`
+	//CollectionPeriod string
+	CollectionDates []time.Time `json:"dates"`
 }
 
 func parseTrashCollection(s *goquery.Selection) (*TrashCollection, error) {
@@ -35,9 +35,9 @@ func parseTrashCollection(s *goquery.Selection) (*TrashCollection, error) {
 		collectionDates = append(collectionDates, d)
 	}
 	t := TrashCollection{
-		Name:             nameAndPeriod[0],
-		CollectionPeriod: nameAndPeriod[1],
-		CollectionDates:  collectionDates,
+		Name: nameAndPeriod[0],
+		//	CollectionPeriod: nameAndPeriod[1],
+		CollectionDates: collectionDates,
 	}
 	return &t, nil
 }
@@ -80,11 +80,18 @@ func main() {
 			resp.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		collectionJson, err := json.Marshal(*collectionForAddress(street, nrParsed))
+		collection := *collectionForAddress(street, nrParsed)
+		wrappedCollectionDates := struct {
+			CollectionDates []TrashCollection `json:"CollectionDates"`
+		}{
+			CollectionDates: collection,
+		}
+		collectionJson, err := json.Marshal(wrappedCollectionDates)
 		if err != nil {
 			io.WriteString(resp, err.Error())
 			return
 		}
+		resp.Header().Add("Access-Control-Allow-Origin", "*")
 		resp.Write(collectionJson)
 	})
 	http.ListenAndServe(":8123", nil)

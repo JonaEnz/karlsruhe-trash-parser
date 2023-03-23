@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
@@ -12,6 +13,10 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
+)
+
+var (
+	port string
 )
 
 type TrashCollection struct {
@@ -66,6 +71,9 @@ func collectionForAddress(street string, houseNr int) *[]TrashCollection {
 
 func main() {
 
+	flag.StringVar(&port, "port", ":7295", "Port")
+	flag.Parse()
+
 	http.HandleFunc("/", func(resp http.ResponseWriter, req *http.Request) {
 		street := req.URL.Query().Get("street")
 		nr := req.URL.Query().Get("nr")
@@ -94,5 +102,5 @@ func main() {
 		resp.Header().Add("Access-Control-Allow-Origin", "*")
 		resp.Write(collectionJson)
 	})
-	http.ListenAndServe(":8123", nil)
+	http.ListenAndServe(port, nil)
 }

@@ -1,4 +1,4 @@
-module example.com/gomod2nix-template
+module karlsruhe-trash-parser
 
 go 1.17
 

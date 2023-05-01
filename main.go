@@ -27,7 +27,7 @@ type TrashCollection struct {
 
 func parseTrashCollection(s *goquery.Selection) (*TrashCollection, error) {
 	nameAndPeriod := strings.Split(s.Children().Eq(1).Text(), ", ")
-	if len(nameAndPeriod) < 2 {
+	if len(nameAndPeriod) < 1 {
 		return nil, errors.New("Not a periodical trash collection.")
 	}
 	collectionDatesText := s.Children().Last().Text()
@@ -40,8 +40,7 @@ func parseTrashCollection(s *goquery.Selection) (*TrashCollection, error) {
 		collectionDates = append(collectionDates, d)
 	}
 	t := TrashCollection{
-		Name: nameAndPeriod[0],
-		//	CollectionPeriod: nameAndPeriod[1],
+		Name:            nameAndPeriod[0],
 		CollectionDates: collectionDates,
 	}
 	return &t, nil
@@ -61,7 +60,7 @@ func collectionForAddress(street string, houseNr int) *[]TrashCollection {
 	doc.Find("#nfoo>.row").Each(func(i int, s *goquery.Selection) {
 		if s.Children().Length() == 3 {
 			collection, err := parseTrashCollection(s)
-			if err == nil {
+			if err == nil && len(collection.CollectionDates) > 0 {
 				collections = append(collections, *collection)
 			}
 		}
